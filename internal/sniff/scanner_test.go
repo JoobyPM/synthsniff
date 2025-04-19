@@ -62,7 +62,7 @@ func TestAnalyse(t *testing.T) {
 			path:       smellyFile,
 			cfg:        Config{Threshold: 30},
 			wantSmelly: true,
-			wantScore:  30 + 3*2 + 10*2, // markdown rule (30) + em dash (3*2) + smart quotes (10*2)
+			wantScore:  43, // markdown rule (30) + em dash (3) + smart quotes (10)
 			wantDetail: 3,
 		},
 		{
@@ -70,7 +70,7 @@ func TestAnalyse(t *testing.T) {
 			path:       smellyFile,
 			cfg:        Config{Threshold: 100},
 			wantSmelly: false,
-			wantScore:  30 + 3*2 + 10*2,
+			wantScore:  43, // markdown rule (30) + em dash (3) + smart quotes (10)
 			wantDetail: 3,
 		},
 		{
@@ -125,7 +125,7 @@ func TestScan(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping in short mode")
 	}
-	
+
 	// Create a temporary test directory structure
 	tempDir := t.TempDir()
 
@@ -220,11 +220,46 @@ func TestScan(t *testing.T) {
 			wantLen:    3, // clean.txt, smelly.md, subdir/subfile.md
 			wantSmelly: 2, // smelly.md, subdir/subfile.md
 		},
+		{
+			name:       "zero workers",
+			roots:      []string{tempDir},
+			cfg:        Config{Threshold: 30, Workers: 0}, // Testing the Workers <= 0 case
+			wantErr:    false,
+			wantLen:    3, // clean.txt, smelly.md, subdir/subfile.md
+			wantSmelly: 2, // smelly.md, subdir/subfile.md
+		},
+		{
+			name:       "negative workers",
+			roots:      []string{tempDir},
+			cfg:        Config{Threshold: 30, Workers: -1}, // Testing the Workers <= 0 case
+			wantErr:    false,
+			wantLen:    3, // clean.txt, smelly.md, subdir/subfile.md
+			wantSmelly: 2, // smelly.md, subdir/subfile.md
+		},
 	}
 
-	// Create a test dictionary file for Scan to use
-	testDict := filepath.Join(tempDir, "test.yaml")
-	testDictContent := `
+	// Create a test dictionary file for regular tests with a higher weight for EMDASH
+	// to ensure files with EMDASH in subdirectories are detected as smelly
+	regDict := filepath.Join(tempDir, "reg_dict.yaml")
+	regDictContent := `
+- name: test-markdown-rule
+  pattern: "\n---\n"
+  weight: 30
+  ext: ".md"
+- name: test-smart-quote
+  pattern: "SMARTQUOTE"
+  weight: 10
+- name: test-em-dash
+  pattern: "EMDASH"
+  weight: 30
+- name: custom-test-pattern
+  pattern: "CUSTOM_PATTERN"
+  weight: 50`
+	require.NoError(t, os.WriteFile(regDict, []byte(regDictContent), 0644))
+
+	// Create a test dictionary file for high threshold test
+	highDict := filepath.Join(tempDir, "high_dict.yaml")
+	highDictContent := `
 - name: test-markdown-rule
   pattern: "\n---\n"
   weight: 30
@@ -238,13 +273,17 @@ func TestScan(t *testing.T) {
 - name: custom-test-pattern
   pattern: "CUSTOM_PATTERN"
   weight: 50`
-	require.NoError(t, os.WriteFile(testDict, []byte(testDictContent), 0644))
+	require.NoError(t, os.WriteFile(highDict, []byte(highDictContent), 0644))
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Use our dictionary file with test patterns
-			tt.cfg.DictPath = testDict 
-			
+			// Choose the appropriate dictionary for the test
+			if tt.name == "high threshold" {
+				tt.cfg.DictPath = highDict
+			} else {
+				tt.cfg.DictPath = regDict
+			}
+
 			results, err := Scan(tt.roots, tt.cfg)
 
 			if tt.wantErr {

@@ -44,7 +44,7 @@ func TestScanSimple(t *testing.T) {
 	results, err := Scan([]string{dir}, cfg)
 	require.NoError(t, err)
 
-	// We should have two files
+	// We should have 2 files (dictionary file is excluded by design)
 	assert.Equal(t, 2, len(results), "Expected 2 files (clean and smelly)")
 
 	// Find the smelly file in the results
@@ -86,25 +86,25 @@ func TestAnalyseSimple(t *testing.T) {
 	// Create a test with debug output
 	content2 := string([]byte(content))
 	pattern := string([]byte("EXACT_TEST_PATTERN"))
-	
+
 	t.Logf("Original content: %q", content)
 	t.Logf("Bytes content: %q", content2)
 	t.Logf("Pattern to search for: %q", pattern)
 	t.Logf("Pattern bytes: % x", []byte(pattern))
 	t.Logf("Content bytes: % x", []byte(content))
-	
+
 	// Check if pattern is in content
 	isFound := strings.Contains(content, "EXACT_TEST_PATTERN")
 	t.Logf("Pattern found with strings.Contains: %v", isFound)
-	
+
 	// Run the analyse function with MaxSize set
 	result := analyse(testFile, rules, Config{
 		Threshold: 30,
 		MaxSize:   1 << 20, // 1MB should be enough
 	})
-	
+
 	// Log the result details
-	t.Logf("Result: smelly=%v, score=%d, details=%v", 
+	t.Logf("Result: smelly=%v, score=%d, details=%v",
 		result.Smelly, result.Score, result.Detail)
 
 	// Verify the analysis results

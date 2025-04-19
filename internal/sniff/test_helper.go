@@ -9,7 +9,7 @@ import (
 // instead of actual Unicode characters which can be tricky to handle in tests.
 func setupTestPatterns(t *testing.T) []Rule {
 	t.Helper()
-	
+
 	// Create test rule patterns that exactly match test file contents
 	// Add explicit patterns for tests rather than the actual Unicode patterns
 	return []Rule{
@@ -27,12 +27,13 @@ func setupTestPatterns(t *testing.T) []Rule {
 		{
 			Name:    "test-em-dash",
 			Pattern: "EMDASH",
-			Weight:  3,
+			// Keep weight at 3 to match TestAnalyse expectations
+			Weight: 3,
 		},
 		{
-			Name:     "custom-test-pattern",
-			Pattern:  "CUSTOM_PATTERN",
-			Weight:   50,
+			Name:    "custom-test-pattern",
+			Pattern: "CUSTOM_PATTERN",
+			Weight:  50,
 		},
 	}
 }

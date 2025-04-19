@@ -32,7 +32,7 @@ func TestSimpleAnalyse(t *testing.T) {
 	// Test with a threshold lower than the rule weight (should be smelly)
 	lowThresholdCfg := Config{Threshold: 30}
 	result := analyse(testFile, rules, lowThresholdCfg)
-	
+
 	// Verify the file is detected as smelly
 	assert.True(t, result.Smelly, "File should be detected as smelly with low threshold")
 	assert.Equal(t, 50, result.Score, "Score should match the rule weight")
@@ -42,7 +42,7 @@ func TestSimpleAnalyse(t *testing.T) {
 	// Test with a threshold higher than the rule weight (should not be smelly)
 	highThresholdCfg := Config{Threshold: 60}
 	result = analyse(testFile, rules, highThresholdCfg)
-	
+
 	// Verify the file is not detected as smelly due to high threshold
 	assert.False(t, result.Smelly, "File should not be detected as smelly with high threshold")
 	assert.Equal(t, 50, result.Score, "Score should still match the rule weight")
@@ -113,7 +113,7 @@ func TestCustomRuleAnalyse(t *testing.T) {
 
 	// Test with the custom rule
 	result := analyse(testFile, rules, Config{Threshold: 30})
-	
+
 	// Verify custom rule detection
 	assert.True(t, result.Smelly, "File should be detected as smelly with custom rule")
 	assert.Equal(t, 50, result.Score, "Score should match the custom rule weight")

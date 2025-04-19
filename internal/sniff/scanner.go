@@ -2,12 +2,12 @@ package sniff
 
 import (
 	"bytes"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strings"
 	"sync"
 )
 
@@ -56,7 +56,12 @@ func Scan(roots []string, cfg Config) ([]Result, error) {
 	// Move directory walking into its own goroutine to prevent deadlock
 	// This decouples job production from result consumption
 	errCh := make(chan error, 1)
+	dictPath := cfg.DictPath
+
 	go func() {
+		// Ensure jobs is closed on BOTH success and error paths
+		defer close(jobs)
+
 		for _, root := range roots {
 			if err := filepath.WalkDir(root, func(p string, d fs.DirEntry, e error) error {
 				if e != nil {
@@ -68,6 +73,26 @@ func Scan(roots []string, cfg Config) ([]Result, error) {
 					}
 					return nil
 				}
+
+				// Skip the dictionary file itself
+				if dictPath != "" && filepath.Clean(p) == filepath.Clean(dictPath) {
+					return nil
+				}
+
+				// Skip rule files by checking extension and content
+				ext := strings.ToLower(filepath.Ext(p))
+				if ext == ".yaml" || ext == ".yml" || ext == ".json" {
+					// If it's a YAML/JSON file, check if it looks like a rules file
+					data, err := os.ReadFile(p)
+					if err == nil && len(data) > 0 {
+						content := string(data)
+						if strings.Contains(content, "pattern") && strings.Contains(content, "weight") {
+							// Looks like a rules file, skip it
+							return nil
+						}
+					}
+				}
+
 				jobs <- job{p}
 				return nil
 			}); err != nil {
@@ -75,8 +100,8 @@ func Scan(roots []string, cfg Config) ([]Result, error) {
 				return
 			}
 		}
-		close(jobs)
-		errCh <- nil // Signal successful completion
+		// Signal successful completion
+		errCh <- nil
 	}()
 
 	// Collect results as they arrive
@@ -89,27 +114,21 @@ func Scan(roots []string, cfg Config) ([]Result, error) {
 	if err := <-errCh; err != nil {
 		return nil, err
 	}
-	
+
 	sort.Slice(results, func(i, j int) bool { return results[i].Path < results[j].Path })
 	return results, nil
 }
 
 func analyse(path string, rules []Rule, cfg Config) Result {
-	// Debug: Log the input parameters
-	fmt.Printf("[analyse debug] path=%q, rules=%d, threshold=%d\n", 
-		path, len(rules), cfg.Threshold)
-	
+	// Skip if file doesn't exist, isn't a regular file, or exceeds size limit
 	info, err := os.Stat(path)
-	if err != nil || !info.Mode().IsRegular() || info.Size() > cfg.MaxSize {
-		fmt.Printf("[analyse debug] Early return: err=%v, isRegular=%v, size=%d, maxSize=%d\n",
-			err, info != nil && info.Mode().IsRegular(), info.Size(), cfg.MaxSize)
+	if err != nil || !info.Mode().IsRegular() || (cfg.MaxSize > 0 && info.Size() > cfg.MaxSize) {
 		return Result{Path: path}
 	}
 
+	// Read file content, skip if it's binary
 	data, err := os.ReadFile(path)
 	if err != nil || bytes.IndexByte(data, 0) != -1 {
-		fmt.Printf("[analyse debug] Read error or binary file: err=%v, hasBinary=%v\n", 
-			err, bytes.IndexByte(data, 0) != -1)
 		return Result{Path: path}
 	}
 
@@ -117,37 +136,35 @@ func analyse(path string, rules []Rule, cfg Config) Result {
 	score := 0
 	detail := make(map[string]RuleHit)
 
-	fmt.Printf("[analyse debug] Checking %d rules for ext=%q\n", len(rules), fileExt)
-	for i, r := range rules {
-		fmt.Printf("[analyse debug] Rule %d: name=%q, pattern=%q\n", i, r.Name, r.Pattern)
-		
+	// Check each rule against the file content
+	for _, r := range rules {
+		// Skip rules that don't apply to this file extension
 		if !r.appliesToExt(fileExt) {
-			fmt.Printf("[analyse debug] Rule does not apply to ext %q\n", fileExt)
 			continue
 		}
+
+		// Count pattern occurrences
 		count := bytes.Count(data, []byte(r.Pattern))
-		fmt.Printf("[analyse debug] Pattern count: %d\n", count)
-		
+
+		// Skip patterns that don't match or don't pass thresholds
 		if count == 0 || !r.passesThresholds(count, len(data)) {
-			fmt.Printf("[analyse debug] Skip: count=%d, passesThreshold=%v\n", 
-				count, count != 0 && r.passesThresholds(count, len(data)))
 			continue
 		}
-		
-		score += count * r.Weight
-		detail[r.Name] = RuleHit{Rule: r, Count: count}
-		fmt.Printf("[analyse debug] Added score: %d, total now: %d\n", count*r.Weight, score)
+
+		// Calculate score and record hit
+		ruleScore := count * r.Weight
+		score += ruleScore
+		detail[r.Name] = RuleHit{
+			Rule:  r,
+			Count: count,
+		}
 	}
 
-	result := Result{
+	// Return the analysis result
+	return Result{
 		Path:   path,
 		Score:  score,
 		Detail: detail,
 		Smelly: score >= cfg.Threshold,
 	}
-	
-	fmt.Printf("[analyse debug] Final result: score=%d, smelly=%v, details=%v\n", 
-		score, score >= cfg.Threshold, detail)
-	
-	return result
 }
