@@ -23,3 +23,8 @@ go.work.sum
 
 # env file
 .env
+
+# synthetic benchmark corpus (auto‑generated)
+internal/sniff/testdata/bench/gen/
+# transient bench outputs
+bench-*.txt

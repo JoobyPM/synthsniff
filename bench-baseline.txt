@@ -1,0 +1,20 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/JoobyPM/synthsniff/internal/sniff
+cpu: Apple M3 Max
+BenchmarkRenderJSON_1K_Results-16    	     214	   5657464 ns/op	 7677547 B/op	   12048 allocs/op
+BenchmarkRenderText/printUltra-16    	   52687	     22383 ns/op	   68284 B/op	      96 allocs/op
+BenchmarkRenderText/RenderUltraVerbose-16         	    1365	    831600 ns/op	 3750879 B/op	    5263 allocs/op
+BenchmarkRenderText/RenderVerbose-16              	   20538	     61639 ns/op	   24700 B/op	     527 allocs/op
+BenchmarkResultFunctions/hitCounts-16             	 2328844	       495.6 ns/op	     936 B/op	       3 allocs/op
+BenchmarkResultFunctions/anySmelly-16             	1000000000	         0.7376 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnalyse_1KB_1Rule-16                     	   99998	     12120 ns/op	    4120 B/op	      10 allocs/op
+BenchmarkAnalyse_128KB_6Rules-16                  	    6242	    195734 ns/op	  132810 B/op	       8 allocs/op
+BenchmarkRuleChecks/appliesToExt-16               	211961018	         5.536 ns/op	       0 B/op	       0 allocs/op
+BenchmarkRuleChecks/passesThresholds-16           	456380772	         2.605 ns/op	       0 B/op	       0 allocs/op
+BenchmarkScan/CPUs/c1-16                          	      12	  90958434 ns/op	12387604 B/op	   73129 allocs/op
+BenchmarkScan/CPUs/c2-16                          	      19	  60069364 ns/op	12387318 B/op	   73130 allocs/op
+BenchmarkScan/CPUs/c4-16                          	      22	  49810712 ns/op	12388334 B/op	   73135 allocs/op
+BenchmarkScan/CPUs/c8-16                          	      13	  82998978 ns/op	12388569 B/op	   73143 allocs/op
+PASS
+ok  	github.com/JoobyPM/synthsniff/internal/sniff	20.443s

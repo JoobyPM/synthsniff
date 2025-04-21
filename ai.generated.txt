@@ -1,0 +1,88 @@
+# 🧑‍💻 **AI‑Generated Guide: C “Hello World” for Dummies**
+
+Below is the simplest possible C program plus step‑by‑step instructions to build and run it—even if you’ve never touched C before.
+
+---
+
+### 1. Write the code
+
+Create a new text file called **`hello.c`** and copy‑paste the six lines below:
+
+```c
+#include <stdio.h>
+
+/* A minimal C program */
+int main(void)
+{
+    printf("Hello, world!\n");
+    return 0;
+}
+```
+
+---
+
+### 2. Install a C compiler (one‑time)
+
+| Platform | Quickest option |
+|----------|-----------------|
+| **Windows** | Install **MinGW‑w64** via MSYS2 or the “Minimalist GCC” installer. It gives you the `gcc` command. |
+| **macOS** | Open Terminal and run `xcode-select --install`, which adds **clang** (works exactly like `gcc` for this guide). |
+| **Linux** | Your distro’s package manager already has GCC. For Debian/Ubuntu run `sudo apt install build-essential`. |
+
+---
+
+### 3. Compile the program
+
+Open your terminal or command prompt, change to the folder where `hello.c` lives, and run:
+
+```bash
+gcc hello.c -o hello
+```
+
+*What just happened?*  
+- `gcc` is the GNU C Compiler.  
+- `hello.c` is the source file you wrote.  
+- `-o hello` tells the compiler to create an executable called **`hello`** (adds `.exe` on Windows automatically).
+
+> If your compiler is `clang`, the exact same command works—just replace `gcc` with `clang`.
+
+---
+
+### 4. Run the executable
+
+- **Windows:**  
+  ```powershell
+  hello.exe
+  ```
+- **macOS / Linux / WSL:**  
+  ```bash
+  ./hello
+  ```
+
+You should see:
+
+```
+Hello, world!
+```
+
+🎉 That’s it—you’ve written, compiled, and run your first C program!
+
+---
+
+## Common gotchas (quick fixes)
+
+| Symptom | Likely cause & fix |
+|---------|-------------------|
+| `gcc: command not found` | Compiler isn’t on your path—reopen terminal or finish installing GCC/Clang. |
+| `hello: Permission denied` (Unix) | Forgot the leading `./` → run `./hello`. |
+| Weird quote characters from copy‑paste | Re‑type any “smart quotes” so they’re straight `" "` quotes in the source file. |
+
+---
+
+### Next steps
+
+1. Change the message in `printf` and recompile.  
+2. Add a second `printf` line—notice you don’t need another `return`.  
+3. Explore command‑line arguments with `int main(int argc, char *argv[])`.
+
+Have fun—and welcome to the world of C programming!

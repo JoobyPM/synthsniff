@@ -1,0 +1,26 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/JoobyPM/synthsniff/internal/sniff
+cpu: Apple M3 Max
+BenchmarkScan/CPUs/c1-16         	      10	 104121079 ns/op	 8077081 B/op	   57183 allocs/op
+BenchmarkScan/CPUs/c1-16         	      10	 105093471 ns/op	 8076180 B/op	   57183 allocs/op
+BenchmarkScan/CPUs/c1-16         	      10	 117611417 ns/op	 8075913 B/op	   57180 allocs/op
+BenchmarkScan/CPUs/c1-16         	      10	 101364162 ns/op	 8075808 B/op	   57180 allocs/op
+BenchmarkScan/CPUs/c1-16         	      10	 101571192 ns/op	 8076408 B/op	   57181 allocs/op
+BenchmarkScan/CPUs/c2-16         	      16	  74755750 ns/op	 8076265 B/op	   57182 allocs/op
+BenchmarkScan/CPUs/c2-16         	      16	  72709810 ns/op	 8075804 B/op	   57183 allocs/op
+BenchmarkScan/CPUs/c2-16         	      16	  69762102 ns/op	 8075823 B/op	   57182 allocs/op
+BenchmarkScan/CPUs/c2-16         	      15	  72322908 ns/op	 8076310 B/op	   57184 allocs/op
+BenchmarkScan/CPUs/c2-16         	      16	  72729023 ns/op	 8076617 B/op	   57185 allocs/op
+BenchmarkScan/CPUs/c4-16         	      20	  56165285 ns/op	 8076412 B/op	   57185 allocs/op
+BenchmarkScan/CPUs/c4-16         	      20	  59251577 ns/op	 8076357 B/op	   57187 allocs/op
+BenchmarkScan/CPUs/c4-16         	      21	  58360325 ns/op	 8076787 B/op	   57186 allocs/op
+BenchmarkScan/CPUs/c4-16         	      20	  57435110 ns/op	 8076625 B/op	   57187 allocs/op
+BenchmarkScan/CPUs/c4-16         	      20	  58148979 ns/op	 8076688 B/op	   57190 allocs/op
+BenchmarkScan/CPUs/c8-16         	      13	  90716125 ns/op	 8079809 B/op	   57203 allocs/op
+BenchmarkScan/CPUs/c8-16         	      13	  87912897 ns/op	 8077561 B/op	   57197 allocs/op
+BenchmarkScan/CPUs/c8-16         	      13	  89956805 ns/op	 8078440 B/op	   57197 allocs/op
+BenchmarkScan/CPUs/c8-16         	      12	  91536295 ns/op	 8077720 B/op	   57199 allocs/op
+BenchmarkScan/CPUs/c8-16         	      13	  87628756 ns/op	 8077402 B/op	   57199 allocs/op
+PASS
+ok  	github.com/JoobyPM/synthsniff/internal/sniff	26.323s
