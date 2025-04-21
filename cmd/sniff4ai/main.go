@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/JoobyPM/synthsniff/internal/sniff"
 )
@@ -16,6 +17,13 @@ const (
 )
 
 func main() {
+	// Set GOMAXPROCS to the number of available cores, but not more than 4
+	maxProcs := runtime.NumCPU()
+	if maxProcs > 4 {
+		maxProcs = 4
+	}
+	runtime.GOMAXPROCS(maxProcs)
+
 	cfg, paths := parseFlags()
 	if len(paths) == 0 {
 		log.Fatal("at least one file or directory is required")

@@ -1,0 +1,22 @@
+# Benchmark Test Files Summary
+
+- `README.keep` (45B) - Placeholder file to keep directory
+  - Path: `/internal/sniff/testdata/bench/README.keep`
+- `ai_large.txt` (32,768B) - Large AI-generated text sample
+  - Path: `/internal/sniff/testdata/bench/ai_large.txt`
+- `ai_medium.txt` (8,192B) - Medium-sized AI-generated text sample
+  - Path: `/internal/sniff/testdata/bench/ai_medium.txt`
+- `ai_small.txt` (1,024B) - Small AI-generated text sample
+  - Path: `/internal/sniff/testdata/bench/ai_small.txt`
+- `clean_large.txt` (32,768B) - Large clean text sample
+  - Path: `/internal/sniff/testdata/bench/clean_large.txt`
+- `clean_medium.txt` (8,192B) - Medium-sized clean text sample
+  - Path: `/internal/sniff/testdata/bench/clean_medium.txt`
+- `clean_small.txt` (1,024B) - Small clean text sample
+  - Path: `/internal/sniff/testdata/bench/clean_small.txt`
+- `code.go` (4,096B) - Go source code sample
+  - Path: `/internal/sniff/testdata/bench/code.go`
+- `markdown_small.md` (1,024B) - Small markdown document sample
+  - Path: `/internal/sniff/testdata/bench/markdown_small.md`
+- `mixed_xl.txt` (131,072B) - Extra large mixed content text sample
+  - Path: `/internal/sniff/testdata/bench/mixed_xl.txt` 

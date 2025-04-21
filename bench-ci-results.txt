@@ -1,0 +1,9 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/JoobyPM/synthsniff/internal/sniff
+cpu: Apple M3 Max
+BenchmarkRenderJSON_1K_Results-16    	     190	   5837268 ns/op	 7678098 B/op	   12047 allocs/op
+BenchmarkAnalyse_1KB_1Rule-16        	   96087	     11993 ns/op	    3096 B/op	       9 allocs/op
+BenchmarkAnalyse_128KB_6Rules-16     	    6361	    195147 ns/op	  141210 B/op	       9 allocs/op
+PASS
+ok  	github.com/JoobyPM/synthsniff/internal/sniff	4.515s
