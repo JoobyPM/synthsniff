@@ -2,6 +2,7 @@ package sniff
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,6 +11,10 @@ import (
 	"strings"
 	"sync"
 )
+
+// LoadedIgnoreFiles keeps track of the ignore files loaded during scanning
+// so they can be reported at the end
+var LoadedIgnoreFiles []string
 
 // getMaxProcs returns the number of available cores, limited to 4
 func getMaxProcs() int {
@@ -45,6 +50,38 @@ func Scan(roots []string, cfg Config) ([]Result, error) {
 	rules, err := LoadRules(cfg.DictPath)
 	if err != nil {
 		return nil, err
+	}
+
+	// Initialize ignore rules if gitignore support is enabled
+	var ignoreRules *IgnoreRules
+	if cfg.UseGitignore {
+		ignoreRules = NewIgnoreRules()
+
+		// Reset the global ignore files list at the start of a scan
+		LoadedIgnoreFiles = nil
+
+		// Load custom ignore file if specified
+		if cfg.IgnoreFile != "" {
+			if err := ignoreRules.LoadCustomIgnoreFile(cfg.IgnoreFile); err != nil {
+				return nil, fmt.Errorf("failed to load ignore file: %v", err)
+			}
+			// Add to global list instead of cfg.LoadedIgnoreFiles
+			LoadedIgnoreFiles = append(LoadedIgnoreFiles, cfg.IgnoreFile)
+		}
+
+		// Pre-load gitignore files from all root directories
+		for _, root := range roots {
+			info, err := os.Stat(root)
+			if err != nil {
+				return nil, err
+			}
+
+			if info.IsDir() {
+				if err := ignoreRules.FindAndLoadGitignores(root); err != nil {
+					return nil, fmt.Errorf("failed to load gitignore files: %v", err)
+				}
+			}
+		}
 	}
 
 	// Set number of workers
@@ -93,7 +130,7 @@ func Scan(roots []string, cfg Config) ([]Result, error) {
 			}
 		}()
 
-		err := walkDirBreadthFirst(roots, cfg.DictPath, jobChannels)
+		err := walkDirBreadthFirst(roots, cfg.DictPath, jobChannels, ignoreRules, cfg.UseGitignore)
 		walkerErrorChan <- err
 	}()
 
@@ -117,7 +154,7 @@ func Scan(roots []string, cfg Config) ([]Result, error) {
 }
 
 // walkDirBreadthFirst walks directories breadth-first and sends files to job channels
-func walkDirBreadthFirst(roots []string, dictPath string, jobChannels []chan []string) error {
+func walkDirBreadthFirst(roots []string, dictPath string, jobChannels []chan []string, ignoreRules *IgnoreRules, useGitignore bool) error {
 	// Constants
 	const batchSize = 32 // Size of each batch of paths
 
@@ -185,11 +222,21 @@ func walkDirBreadthFirst(roots []string, dictPath string, jobChannels []chan []s
 					continue
 				}
 
+				// Check gitignore rules for directories
+				if useGitignore && ignoreRules != nil && ignoreRules.ShouldIgnore(entryPath) {
+					continue
+				}
+
 				// Add subdirectory to the queue for breadth-first traversal
 				dirQueue = append(dirQueue, entryPath)
 			} else {
 				// Skip dictionary file
 				if dictPath != "" && filepath.Clean(entryPath) == filepath.Clean(dictPath) {
+					continue
+				}
+
+				// Check gitignore rules for files
+				if useGitignore && ignoreRules != nil && ignoreRules.ShouldIgnore(entryPath) {
 					continue
 				}
 

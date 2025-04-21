@@ -36,6 +36,10 @@ func Render(list []Result, cfg Config) bool {
 	if !anySmelly(list) {
 		fmt.Printf("✅ No AI smell detected in %d file(s)\n", len(list))
 	}
+
+	// Print loaded ignore files report
+	printIgnoreFilesReport(cfg)
+
 	return anySmelly(list)
 }
 
@@ -109,4 +113,17 @@ func hitCounts(r Result) map[string]int {
 
 func escape(s string) string {
 	return strings.NewReplacer("\n", `\n`, "\r", `\r`, "\t", `\t`).Replace(s)
+}
+
+// printIgnoreFilesReport prints information about loaded gitignore files
+func printIgnoreFilesReport(cfg Config) {
+	// Always print when gitignore is enabled and files are loaded
+	if !cfg.UseGitignore || len(LoadedIgnoreFiles) == 0 {
+		return
+	}
+
+	fmt.Println("\nLoaded ignore files:")
+	for _, path := range LoadedIgnoreFiles {
+		fmt.Printf("  - %s\n", path)
+	}
 }

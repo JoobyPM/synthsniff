@@ -52,6 +52,8 @@ func parseFlags() (sniff.Config, []string) {
 
 	flag.BoolVar(&cfg.CIMode, "ci", false, "exit non‑zero on AI smell")
 	flag.BoolVar(&cfg.JSON, "json", false, "machine‑readable JSON output")
+	flag.BoolVar(&cfg.UseGitignore, "use-gitignore", false, "respect .gitignore files")
+	flag.StringVar(&cfg.IgnoreFile, "ignore-file", "", "custom ignore file path")
 	flag.Parse()
 
 	if cfg.Threshold == -1 {
